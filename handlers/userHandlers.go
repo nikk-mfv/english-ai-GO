@@ -1,8 +1,8 @@
-package controllers
+package handlers
 
 import (
-	"englishAI/config"
-	"englishAI/models"
+	models "englishAI/entities"
+	"englishAI/repository"
 
 	"net/http"
 
@@ -12,13 +12,13 @@ import (
 func GetUsers(c *gin.Context) {
 	var users []models.User
 
-	// Lấy danh sách User từ database
-	if err := config.DB.Find(&users).Error; err != nil {
+	// get User from database
+	if err := repository.GetDatabase().Find(&users).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch users"})
 		return
 	}
 
-	// Trả về danh sách User dưới dạng JSON
+	// return  User list with JSON type
 	c.JSON(http.StatusOK, users)
 }
 
@@ -29,6 +29,6 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	config.DB.Create(&user)
+	repository.GetDatabase().Create(&user)
 	c.JSON(http.StatusOK, user)
 }

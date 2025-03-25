@@ -1,8 +1,8 @@
 package main
 
 import (
-	"englishAI/config"
 	"englishAI/migrations"
+	"englishAI/repository"
 	"englishAI/routes"
 	"log"
 
@@ -10,13 +10,13 @@ import (
 )
 
 func main() {
-	config.ConnectDatabase()
+	repository.ConnectDatabase()
 	migrations.Migrate()
 
 	log.Println("Connected to the database!")
 
 	r := gin.Default()
-	routes.UserRoutes(r)
+	routes.Routes(r)
 
 	r.Run(":8080")
 }

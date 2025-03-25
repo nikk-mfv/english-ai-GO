@@ -1,16 +1,15 @@
 package migrations
 
 import (
-	"englishAI/models"
+	"englishAI/entities"
 
-	"englishAI/config"
+	"englishAI/repository"
 	"fmt"
 )
 
 // Migrate runs the database migrations
 func Migrate() {
 
-	config.DB.AutoMigrate(&models.User{}, &models.Topic{}, &models.UserTopic{}, &models.Vocabulary{}, &models.TopicVocabulary{}, &models.UserVocabulary{}, &models.History{}, &models.Message{}, &models.HistoryMessage{})
+	repository.GetDatabase().AutoMigrate(&entities.User{}, &entities.Topic{}, &entities.Vocabulary{}, &entities.TopicVocabulary{}, &entities.History{}, &entities.Message{})
 	fmt.Println("Database migrated!")
-
 }
