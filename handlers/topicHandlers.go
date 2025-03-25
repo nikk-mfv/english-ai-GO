@@ -1,23 +1,19 @@
 package handlers
 
 import (
-	models "englishAI/entities"
 	"englishAI/repository"
-
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetTopics(c *gin.Context) {
-	var topics []models.User
+type TopicHandler struct{}
 
-	// get topics from database
-	if err := repository.GetDatabase().Find(&topics).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot fetch topics"})
-		return
-	}
+var topicRepository = repository.TopicRepository{}
 
-	// return  User list with JSON type
-	c.JSON(http.StatusOK, topics)
+func (h *TopicHandler) GetTopics(c *gin.Context) {
+	topicRepository.GetTopics(c)
+}
+
+func (h *TopicHandler) CreateTopics(c *gin.Context) {
+	topicRepository.CreateTopics(c)
 }

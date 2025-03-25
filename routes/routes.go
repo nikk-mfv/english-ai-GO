@@ -7,13 +7,11 @@ import (
 )
 
 func Routes(r *gin.Engine) {
-	userGroup := r.Group("/api/v1/users")
-	{
-		userGroup.GET("/", handlers.GetUsers)
-		userGroup.POST("/", handlers.CreateUser)
-	}
+
+	topicHandler := handlers.TopicHandler{}
 	TopicGroup := r.Group("/api/v1/topics")
 	{
-		TopicGroup.GET("/", handlers.GetTopics)
+		TopicGroup.GET("/", topicHandler.GetTopics)
+		TopicGroup.POST("/", topicHandler.CreateTopics)
 	}
 }
