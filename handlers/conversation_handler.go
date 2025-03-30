@@ -1,0 +1,49 @@
+package handlers
+
+import (
+	"englishAI/entities"
+	"englishAI/repository"
+	"englishAI/usecase"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+type conversationHandler struct {
+	BaseHandler
+}
+
+func NewConversationHandler() *conversationHandler {
+	return &conversationHandler{}
+}
+
+// conversation repo
+var conversationRepo = repository.NewConversationRepository()
+
+// conversation usecase
+var createUsecase = usecase.NewConversationCreateUsecase(conversationRepo)
+
+func (h *conversationHandler) Create(c *gin.Context) {
+	var input struct {
+		Name   string `json:"name" binding:"required"`
+		UserID uint   `json:"user_id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	conversation := entities.Conversation{
+		Name:   input.Name,
+		UserID: input.UserID,
+	}
+
+	conversation, err := createUsecase.Execute(c, conversation)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": conversation})
+}

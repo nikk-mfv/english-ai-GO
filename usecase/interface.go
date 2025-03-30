@@ -6,7 +6,7 @@ import (
 )
 
 type IVocabularyCreateUsecase interface {
-	Execute(ctx context.Context, Name string, Definition string, Example string, Pronunciation string) ([]entities.Vocabulary, error)
+	Execute(ctx context.Context, newVocabulary entities.Vocabulary) (entities.Vocabulary, error)
 }
 
 type IVocabularyFindUsecase interface {
@@ -19,4 +19,9 @@ type IVocabularyDeleteUsecase interface {
 
 type IVocabularyUpdateUsecase interface {
 	Execute(ctx context.Context, id string, obj *entities.Vocabulary) error
+}
+
+// Conversation
+type IConversationCreateUsecase interface {
+	Execute(ctx context.Context, newConversation entities.Conversation) (entities.Conversation, error)
 }
