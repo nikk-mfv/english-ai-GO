@@ -23,3 +23,11 @@ func (r *vocabularyRepository) GetAll(ctx context.Context) ([]entities.Vocabular
 	}
 	return vocabularies, nil
 }
+
+func (r *vocabularyRepository) DeleteByID(ctx context.Context, id string) error {
+	return config.GetDatabase().Where("id = ?", id).Delete(&entities.Vocabulary{}).Error
+}
+
+func (r *vocabularyRepository) UpdateByID(ctx context.Context, id string, obj *entities.Vocabulary) error {
+	return config.GetDatabase().Model(&entities.Vocabulary{}).Where("id = ?", id).Updates(obj).Error
+}

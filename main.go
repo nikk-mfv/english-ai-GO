@@ -2,6 +2,7 @@ package main
 
 import (
 	"englishAI/config"
+	"englishAI/migrations"
 	"englishAI/routes"
 	"log"
 
@@ -12,7 +13,7 @@ import (
 func main() {
 	log.Println("Starting server...")
 	config.ConnectDatabase()
-	// migrations.Migrate()
+	migrations.Migrate()
 
 	log.Println("Connected to the database!")
 
