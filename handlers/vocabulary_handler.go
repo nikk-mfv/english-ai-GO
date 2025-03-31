@@ -39,7 +39,12 @@ func (hdl *VocabularyHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	vocab, err := ucCreate.Execute(ctx, input.Name, input.Definition, input.Example, input.Pronunciation)
+	vocab, err := ucCreate.Execute(ctx, entities.Vocabulary{
+		Name:          input.Name,
+		Definition:    input.Definition,
+		Example:       input.Example,
+		Pronunciation: input.Pronunciation,
+	})
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
