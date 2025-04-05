@@ -11,7 +11,6 @@ func Routes(r *gin.Engine) {
 	TopicGroup := r.Group("/api/v1/topic")
 	{
 		TopicGroup.POST("", topicHandler.Create)
-		TopicGroup.GET("", topicHandler.Find)
 	}
 
 	vocabHandler := handlers.VocabularyHandler{}

@@ -31,7 +31,3 @@ type IConversationCreateUsecase interface {
 type ITopicCreateUsecase interface {
 	Execute(ctx *gin.Context, topic entities.Topic) (entities.Topic, error)
 }
-
-type ITopicGetAllUsecase interface {
-	Execute(ctx *gin.Context) ([]entities.Topic, error)
-}

@@ -19,7 +19,6 @@ var (
 	topicRepository = repository.NewTopicRepository()
 	// usecase
 	topicCreateUsecase = usecase.NewTopicCreateUsecase(topicRepository)
-	topicGetUsecase    = usecase.NewTopicGetAllUsecase(topicRepository)
 )
 
 func NewTopicHandler() *topicHandler {
@@ -27,7 +26,6 @@ func NewTopicHandler() *topicHandler {
 }
 
 func (hd1 *topicHandler) Create(ctx *gin.Context) {
-
 	var topicInput struct {
 		Name   string `json:"name" binding:"required"`
 		UserID uint   `json:"user_id" binding:"required"`
@@ -35,7 +33,7 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 
 	// Bind JSON to newtopic
 	if err := ctx.ShouldBindJSON(&topicInput); err != nil {
-		respondWithJSON(ctx, http.StatusBadRequest, gin.H{"error": "invalid request data"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request data"})
 		return
 	}
 
@@ -47,29 +45,17 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 	// check existing topic
 	var existingTopic entities.Topic
 	if err := config.GetDatabase().Where("name= ? ", newTopic.Name).First(&existingTopic).Error; err == nil {
-		respondWithJSON(ctx, http.StatusBadRequest, gin.H{"error": "topic already existed"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "topic already existed"})
 		return
 	}
 
-	createdTopic, err := topicCreateUsecase.Execute(ctx, newTopic)
 	//add new topic to database
+	createdTopic, err := topicCreateUsecase.Execute(ctx, newTopic)
 	if err != nil {
-		respondWithJSON(ctx, http.StatusInternalServerError, gin.H{"error": "cannot create new topic: " + err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot create new topic: " + err.Error()})
 		return
 	}
 
-	//success, do not have error
-	respondWithJSON(ctx, http.StatusOK, createdTopic)
-}
-
-func (hd1 *topicHandler) Find(ctx *gin.Context) {
-	topics, err := topicGetUsecase.Execute(ctx)
-
-	if err != nil {
-		respondWithJSON(ctx, http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	//success, do not have error
-	respondWithJSON(ctx, http.StatusOK, topics)
+	//successfully created topic
+	ctx.JSON(http.StatusOK, createdTopic)
 }
