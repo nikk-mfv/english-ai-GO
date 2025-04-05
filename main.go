@@ -2,7 +2,6 @@ package main
 
 import (
 	"englishAI/config"
-	"englishAI/migrations"
 	"englishAI/routes"
 	"log"
 
@@ -11,14 +10,21 @@ import (
 )
 
 func main() {
+	log.Println("Starting server...")
 	config.ConnectDatabase()
-	migrations.Migrate()
+	// migrations.Migrate()
 
 	log.Println("Connected to the database!")
 
 	// Allow all origins
 	r := gin.Default()
-	r.Use(cors.Default())
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}))
 
 	routes.Routes(r)
 
