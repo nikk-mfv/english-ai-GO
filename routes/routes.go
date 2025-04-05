@@ -19,5 +19,7 @@ func Routes(r *gin.Engine) {
 	{
 		VocabGroup.POST("", vocabHandler.Create)
 		VocabGroup.GET("", vocabHandler.Find)
+		VocabGroup.DELETE("/:id", vocabHandler.DeleteById)
+		VocabGroup.PUT("/:id", vocabHandler.UpdateById)
 	}
 }

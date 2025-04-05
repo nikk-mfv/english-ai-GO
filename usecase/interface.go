@@ -12,3 +12,11 @@ type IVocabularyCreateUsecase interface {
 type IVocabularyFindUsecase interface {
 	Execute(ctx context.Context) ([]entities.Vocabulary, error)
 }
+
+type IVocabularyDeleteUsecase interface {
+	Execute(ctx context.Context, id string) error
+}
+
+type IVocabularyUpdateUsecase interface {
+	Execute(ctx context.Context, id string, obj *entities.Vocabulary) error
+}
