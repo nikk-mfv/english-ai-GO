@@ -7,11 +7,11 @@ import (
 )
 
 func Routes(r *gin.Engine) {
-	topicHandler := handlers.TopicHandler{}
-	TopicGroup := r.Group("/api/v1/topics")
+	topicHandler := handlers.NewTopicHandler()
+	TopicGroup := r.Group("/api/v1/topic")
 	{
-		TopicGroup.GET("/", topicHandler.GetTopics)
-		TopicGroup.POST("/", topicHandler.CreateTopics)
+		TopicGroup.POST("", topicHandler.Create)
+		TopicGroup.GET("", topicHandler.Find)
 	}
 
 	vocabHandler := handlers.VocabularyHandler{}

@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"englishAI/entities"
+
+	"github.com/gin-gonic/gin"
 )
 
 type IVocabularyRepository interface {
@@ -14,4 +16,9 @@ type IVocabularyRepository interface {
 
 type IConversationRepository interface {
 	Create(ctx context.Context, obj *entities.Conversation) error
+}
+
+type ITopicRepository interface {
+	GetTopics(ctx *gin.Context) ([]entities.Topic, error)
+	CreateTopic(ctx *gin.Context, topic *entities.Topic) error
 }
