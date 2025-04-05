@@ -11,3 +11,7 @@ type IVocabularyRepository interface {
 	DeleteByID(ctx context.Context, id string) error
 	UpdateByID(ctx context.Context, id string, obj *entities.Vocabulary) error
 }
+
+type IConversationRepository interface {
+	Create(ctx context.Context, obj *entities.Conversation) error
+}

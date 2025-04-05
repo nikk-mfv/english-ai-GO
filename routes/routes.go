@@ -22,4 +22,10 @@ func Routes(r *gin.Engine) {
 		VocabGroup.DELETE("/:id", vocabHandler.DeleteById)
 		VocabGroup.PUT("/:id", vocabHandler.UpdateById)
 	}
+
+	conversationHandler := handlers.NewConversationHandler()
+	ConversationGroup := r.Group("/api/v1/conversation")
+	{
+		ConversationGroup.POST("", conversationHandler.Create)
+	}
 }
