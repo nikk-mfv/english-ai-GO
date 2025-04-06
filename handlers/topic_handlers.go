@@ -5,7 +5,6 @@ import (
 	"englishAI/entities"
 	"englishAI/repository"
 	"englishAI/usecase"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -64,7 +63,6 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 }
 
 func (hd1 *topicHandler) Find(ctx *gin.Context) {
-	fmt.Print("Find topic handler called\n")
 	topics, err := ucFindTopics.Execute(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot find topics: " + err.Error()})
