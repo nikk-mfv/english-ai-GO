@@ -5,6 +5,7 @@ import (
 	"englishAI/entities"
 	"englishAI/repository"
 	"englishAI/usecase"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,8 +18,10 @@ type topicHandler struct {
 var (
 	// repo
 	topicRepository = repository.NewTopicRepository()
+
 	// usecase
-	topicCreateUsecase = usecase.NewTopicCreateUsecase(topicRepository)
+	ucCreateTopic = usecase.NewTopicCreateUsecase(topicRepository)
+	ucFindTopics  = usecase.NewTopicFindUseCase(topicRepository)
 )
 
 func NewTopicHandler() *topicHandler {
@@ -33,7 +36,7 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 
 	// Bind JSON to newtopic
 	if err := ctx.ShouldBindJSON(&topicInput); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request data"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request data" + err.Error()})
 		return
 	}
 
@@ -50,7 +53,7 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 	}
 
 	//add new topic to database
-	createdTopic, err := topicCreateUsecase.Execute(ctx, newTopic)
+	createdTopic, err := ucCreateTopic.Execute(ctx, newTopic)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot create new topic: " + err.Error()})
 		return
@@ -58,4 +61,20 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 
 	//successfully created topic
 	ctx.JSON(http.StatusOK, createdTopic)
+}
+
+func (hd1 *topicHandler) Find(ctx *gin.Context) {
+	fmt.Print("Find topic handler called\n")
+	topics, err := ucFindTopics.Execute(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot find topics: " + err.Error()})
+		return
+	}
+
+	if len(topics) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "no topics found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, topics)
 }
