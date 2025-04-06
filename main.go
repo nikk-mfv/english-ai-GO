@@ -13,6 +13,7 @@ import (
 func main() {
 	log.Println("Starting server...")
 	config.ConnectDatabase()
+
 	migrations.Migrate()
 
 	log.Println("Connected to the database!")
@@ -29,5 +30,5 @@ func main() {
 
 	routes.Routes(r)
 
-	r.Run(":8080")
+	r.Run("0.0.0.0:8080")
 }
