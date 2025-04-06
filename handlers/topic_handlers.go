@@ -70,7 +70,7 @@ func (hd1 *topicHandler) Find(ctx *gin.Context) {
 	}
 
 	if len(topics) == 0 {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "no topics found"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "no topics found"})
 		return
 	}
 
