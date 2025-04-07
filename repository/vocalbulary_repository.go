@@ -12,13 +12,25 @@ func NewVocabularyRepository() IVocabularyRepository {
 	return &vocabularyRepository{}
 }
 
+func (r *vocabularyRepository) Count(ctx context.Context) (uint32, error) {
+	var count int64
+	if err := config.GetDatabase().Model(&entities.Vocabulary{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return uint32(count), nil
+}
+
 func (r *vocabularyRepository) Create(ctx context.Context, obj *entities.Vocabulary) error {
 	return config.GetDatabase().Create(obj).Error
 }
 
-func (r *vocabularyRepository) GetAll(ctx context.Context) ([]entities.Vocabulary, error) {
+func (r *vocabularyRepository) GetAll(ctx context.Context, paging entities.PagingRequest) ([]entities.Vocabulary, error) {
 	var vocabularies []entities.Vocabulary
-	if err := config.GetDatabase().Find(&vocabularies).Error; err != nil {
+
+	GormPaging := paging.GormPaging(config.GetDatabase())
+
+	if err := GormPaging.Find(&vocabularies).Error; err != nil {
 		return nil, err
 	}
 	return vocabularies, nil
