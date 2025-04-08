@@ -17,8 +17,10 @@ type topicHandler struct {
 var (
 	// repo
 	topicRepository = repository.NewTopicRepository()
+
 	// usecase
-	topicCreateUsecase = usecase.NewTopicCreateUsecase(topicRepository)
+	ucCreateTopic = usecase.NewTopicCreateUsecase(topicRepository)
+	ucFindTopics  = usecase.NewTopicFindUseCase(topicRepository)
 )
 
 func NewTopicHandler() *topicHandler {
@@ -33,7 +35,7 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 
 	// Bind JSON to newtopic
 	if err := ctx.ShouldBindJSON(&topicInput); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request data"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request data" + err.Error()})
 		return
 	}
 
@@ -50,7 +52,7 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 	}
 
 	//add new topic to database
-	createdTopic, err := topicCreateUsecase.Execute(ctx, newTopic)
+	createdTopic, err := ucCreateTopic.Execute(ctx, newTopic)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot create new topic: " + err.Error()})
 		return
@@ -58,4 +60,14 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 
 	//successfully created topic
 	ctx.JSON(http.StatusOK, createdTopic)
+}
+
+func (hd1 *topicHandler) Find(ctx *gin.Context) {
+	topics, err := ucFindTopics.Execute(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot find topics: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, topics)
 }

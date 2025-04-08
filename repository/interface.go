@@ -20,4 +20,5 @@ type IConversationRepository interface {
 
 type ITopicRepository interface {
 	Create(ctx *gin.Context, topic *entities.Topic) error
+	GetAll(ctx *gin.Context) ([]entities.Topic, error)
 }
