@@ -8,8 +8,9 @@ import (
 )
 
 type IVocabularyRepository interface {
+	Count(ctx context.Context) (uint32, error)
 	Create(ctx context.Context, obj *entities.Vocabulary) error
-	GetAll(ctx context.Context) ([]entities.Vocabulary, error)
+	GetAll(ctx context.Context, paging entities.PagingRequest) ([]entities.Vocabulary, error)
 	DeleteByID(ctx context.Context, id string) error
 	UpdateByID(ctx context.Context, id string, obj *entities.Vocabulary) error
 }
