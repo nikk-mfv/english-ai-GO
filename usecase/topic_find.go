@@ -1,10 +1,9 @@
 package usecase
 
 import (
+	"context"
 	"englishAI/entities"
 	"englishAI/repository"
-
-	"github.com/gin-gonic/gin"
 )
 
 type topicFindUseCase struct {
@@ -15,6 +14,6 @@ func NewTopicFindUseCase(topicRepo repository.ITopicRepository) ITopicFindUsecas
 	return &topicFindUseCase{topicRepo: topicRepo}
 }
 
-func (uc *topicFindUseCase) Execute(ctx *gin.Context) ([]entities.Topic, error) {
-	return uc.topicRepo.GetAll(ctx)
+func (uc *topicFindUseCase) Execute(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, int64, error) {
+	return uc.topicRepo.GetByPage(ctx, paging)
 }

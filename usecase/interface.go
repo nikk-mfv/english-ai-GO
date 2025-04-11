@@ -3,8 +3,6 @@ package usecase
 import (
 	"context"
 	"englishAI/entities"
-
-	"github.com/gin-gonic/gin"
 )
 
 type IVocabularyCreateUsecase interface {
@@ -30,9 +28,9 @@ type IConversationCreateUsecase interface {
 
 // Topic
 type ITopicCreateUsecase interface {
-	Execute(ctx *gin.Context, topic entities.Topic) (entities.Topic, error)
+	Execute(ctx context.Context, topic entities.Topic) (entities.Topic, error)
 }
 
 type ITopicFindUsecase interface {
-	Execute(ctx *gin.Context) ([]entities.Topic, error)
+	Execute(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, int64, error)
 }

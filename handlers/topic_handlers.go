@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"englishAI/config"
 	"englishAI/entities"
 	"englishAI/repository"
 	"englishAI/usecase"
@@ -19,8 +18,8 @@ var (
 	topicRepository = repository.NewTopicRepository()
 
 	// usecase
-	ucCreateTopic = usecase.NewTopicCreateUsecase(topicRepository)
-	ucFindTopics  = usecase.NewTopicFindUseCase(topicRepository)
+	ucCreateTopic      = usecase.NewTopicCreateUsecase(topicRepository)
+	ucFindTopicsByPage = usecase.NewTopicFindUseCase(topicRepository)
 )
 
 func NewTopicHandler() *topicHandler {
@@ -44,13 +43,6 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 		UserID: topicInput.UserID,
 	}
 
-	// check existing topic
-	var existingTopic entities.Topic
-	if err := config.GetDatabase().Where("name= ? ", newTopic.Name).First(&existingTopic).Error; err == nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "topic already existed"})
-		return
-	}
-
 	//add new topic to database
 	createdTopic, err := ucCreateTopic.Execute(ctx, newTopic)
 	if err != nil {
@@ -63,11 +55,28 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 }
 
 func (hd1 *topicHandler) Find(ctx *gin.Context) {
-	topics, err := ucFindTopics.Execute(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot find topics: " + err.Error()})
+	var paging entities.PagingRequest
+
+	if err := ctx.ShouldBindQuery(&paging); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid params"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, topics)
+	paging.SetDefautls()
+
+	topics, total, err := ucFindTopicsByPage.Execute(ctx, paging)
+	if err != nil {
+		if err.Error() == "topic already exists" {
+			ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot find topics: " + err.Error()})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, entities.PagingResponse[entities.Topic]{
+		Data:       topics,
+		TotalItems: total,
+		Size:       int64(paging.Size),
+	})
 }
