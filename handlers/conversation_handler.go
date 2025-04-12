@@ -22,6 +22,26 @@ var conversationRepo = repository.NewConversationRepository()
 
 // conversation usecase
 var createUsecase = usecase.NewConversationCreateUsecase(conversationRepo)
+var findUsecase = usecase.NewConversationFindUseCase(conversationRepo)
+
+func (h *conversationHandler) Find(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var conversation = entities.Conversation{}
+
+	// call usecase
+	conversation, err := findUsecase.Execute(id)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, entities.Response{
+		Data: conversation,
+	})
+
+}
 
 func (h *conversationHandler) Create(c *gin.Context) {
 	var input struct {

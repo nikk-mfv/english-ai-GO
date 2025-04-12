@@ -28,6 +28,10 @@ type IConversationCreateUsecase interface {
 	Execute(ctx context.Context, newConversation entities.Conversation) (entities.Conversation, error)
 }
 
+type IConversationFindUsecase interface {
+	Execute(id string) (entities.Conversation, error)
+}
+
 // Topic
 type ITopicCreateUsecase interface {
 	Execute(ctx *gin.Context, topic entities.Topic) (entities.Topic, error)
