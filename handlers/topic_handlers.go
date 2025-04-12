@@ -5,6 +5,7 @@ import (
 	"englishAI/repository"
 	"englishAI/usecase"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,28 +56,34 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 }
 
 func (hd1 *topicHandler) Find(ctx *gin.Context) {
-	var paging entities.PagingRequest
+	pageStr := ctx.DefaultQuery("page", "1")
+	sizeStr := ctx.DefaultQuery("size", "10")
 
-	if err := ctx.ShouldBindQuery(&paging); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid params"})
+	page, err := strconv.ParseInt(pageStr, 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page param"})
 		return
 	}
 
-	paging.SetDefautls()
+	size, err := strconv.ParseInt(sizeStr, 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid size param"})
+		return
+	}
+
+	paging := entities.PagingRequest{
+		Page: uint32(page),
+		Size: uint32(size),
+	}
 
 	topics, total, err := ucFindTopicsByPage.Execute(ctx, paging)
 	if err != nil {
-		if err.Error() == "topic already exists" {
-			ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot find topics: " + err.Error()})
-		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot find topics: " + err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, entities.PagingResponse[entities.Topic]{
-		Data:       topics,
-		TotalItems: total,
-		Size:       int64(paging.Size),
+	ctx.JSON(http.StatusOK, entities.Response{
+		Data:   topics,
+		Paging: entities.ResponsePaging{Total: total},
 	})
 }

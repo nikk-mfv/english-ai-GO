@@ -5,6 +5,7 @@ import (
 	"englishAI/repository"
 	"englishAI/usecase"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,13 +56,35 @@ func (hdl *VocabularyHandler) Create(ctx *gin.Context) {
 }
 
 func (hdl *VocabularyHandler) Find(ctx *gin.Context) {
-	vocab, err := ucFind.Execute(ctx)
+	pageStr := ctx.DefaultQuery("page", "1")
+	sizeStr := ctx.DefaultQuery("size", "10")
+
+	page, err := strconv.ParseInt(pageStr, 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page param"})
+		return
+	}
+
+	size, err := strconv.ParseInt(sizeStr, 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid size param"})
+		return
+	}
+
+	paging := entities.PagingRequest{
+		Page: uint32(page),
+		Size: uint32(size),
+	}
+	vocab, total, err := ucFind.Execute(ctx, paging)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, vocab)
+	ctx.JSON(http.StatusOK, entities.Response{
+		Data:   vocab,
+		Paging: entities.ResponsePaging{Total: total},
+	})
 }
 
 func (hdl *VocabularyHandler) DeleteById(ctx *gin.Context) {

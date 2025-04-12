@@ -10,7 +10,7 @@ type IVocabularyCreateUsecase interface {
 }
 
 type IVocabularyFindUsecase interface {
-	Execute(ctx context.Context) ([]entities.Vocabulary, error)
+	Execute(ctx context.Context, paging entities.PagingRequest) ([]entities.Vocabulary, uint32, error)
 }
 
 type IVocabularyDeleteUsecase interface {
@@ -32,5 +32,5 @@ type ITopicCreateUsecase interface {
 }
 
 type ITopicFindUsecase interface {
-	Execute(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, int64, error)
+	Execute(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, uint32, error)
 }
