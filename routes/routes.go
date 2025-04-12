@@ -27,5 +27,6 @@ func Routes(r *gin.Engine) {
 	ConversationGroup := r.Group("/api/v1/conversation")
 	{
 		ConversationGroup.POST("", conversationHandler.Create)
+		ConversationGroup.GET("/:id", conversationHandler.Find)
 	}
 }
