@@ -3,8 +3,6 @@ package repository
 import (
 	"context"
 	"englishAI/entities"
-
-	"github.com/gin-gonic/gin"
 )
 
 type IVocabularyRepository interface {
@@ -21,6 +19,7 @@ type IConversationRepository interface {
 }
 
 type ITopicRepository interface {
-	Create(ctx *gin.Context, topic *entities.Topic) error
-	GetAll(ctx *gin.Context) ([]entities.Topic, error)
+	CountTotal(ctx context.Context) (uint32, error)
+	Create(ctx context.Context, topic *entities.Topic) error
+	GetByPage(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, error)
 }

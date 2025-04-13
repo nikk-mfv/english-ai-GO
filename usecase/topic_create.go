@@ -1,10 +1,9 @@
 package usecase
 
 import (
+	"context"
 	"englishAI/entities"
 	"englishAI/repository"
-
-	"github.com/gin-gonic/gin"
 )
 
 type topicCreateUsecase struct {
@@ -15,7 +14,7 @@ func NewTopicCreateUsecase(topicRepository repository.ITopicRepository) ITopicCr
 	return &topicCreateUsecase{topicRepository: topicRepository}
 }
 
-func (uc *topicCreateUsecase) Execute(ctx *gin.Context, topic entities.Topic) (entities.Topic, error) {
+func (uc *topicCreateUsecase) Execute(ctx context.Context, topic entities.Topic) (entities.Topic, error) {
 
 	if err := uc.topicRepository.Create(ctx, &topic); err != nil {
 		return entities.Topic{}, err

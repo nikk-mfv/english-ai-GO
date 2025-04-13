@@ -8,5 +8,5 @@ type PagingRequest struct {
 }
 
 func (p PagingRequest) GormPaging(db *gorm.DB) *gorm.DB {
-	return db.Limit(int(p.Size)).Offset(int(p.Size) * (int(p.Page) - 1))
+	return db.Order("created_at DESC").Limit(int(p.Size)).Offset(int(p.Size) * (int(p.Page) - 1))
 }

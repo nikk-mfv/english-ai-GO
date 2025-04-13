@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"englishAI/config"
 	"englishAI/entities"
 	"englishAI/repository"
 	"englishAI/usecase"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,8 +19,8 @@ var (
 	topicRepository = repository.NewTopicRepository()
 
 	// usecase
-	ucCreateTopic = usecase.NewTopicCreateUsecase(topicRepository)
-	ucFindTopics  = usecase.NewTopicFindUseCase(topicRepository)
+	ucCreateTopic      = usecase.NewTopicCreateUsecase(topicRepository)
+	ucFindTopicsByPage = usecase.NewTopicFindUseCase(topicRepository)
 )
 
 func NewTopicHandler() *topicHandler {
@@ -44,13 +44,6 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 		UserID: topicInput.UserID,
 	}
 
-	// check existing topic
-	var existingTopic entities.Topic
-	if err := config.GetDatabase().Where("name= ? ", newTopic.Name).First(&existingTopic).Error; err == nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "topic already existed"})
-		return
-	}
-
 	//add new topic to database
 	createdTopic, err := ucCreateTopic.Execute(ctx, newTopic)
 	if err != nil {
@@ -63,11 +56,34 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 }
 
 func (hd1 *topicHandler) Find(ctx *gin.Context) {
-	topics, err := ucFindTopics.Execute(ctx)
+	pageStr := ctx.DefaultQuery("page", "1")
+	sizeStr := ctx.DefaultQuery("size", "10")
+
+	page, err := strconv.ParseInt(pageStr, 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page param"})
+		return
+	}
+
+	size, err := strconv.ParseInt(sizeStr, 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid size param"})
+		return
+	}
+
+	paging := entities.PagingRequest{
+		Page: uint32(page),
+		Size: uint32(size),
+	}
+
+	topics, total, err := ucFindTopicsByPage.Execute(ctx, paging)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot find topics: " + err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, topics)
+	ctx.JSON(http.StatusOK, entities.Response{
+		Data:   topics,
+		Paging: entities.ResponsePaging{Total: total},
+	})
 }
