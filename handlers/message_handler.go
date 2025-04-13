@@ -57,7 +57,6 @@ func (h *messageHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	log.Println(aiMessStr)
 	var aiMess = &entities.Message{
 		Message:        aiMessStr,
 		ConversationID: input.ConversationID,
