@@ -35,5 +35,6 @@ func Routes(r *gin.Engine) {
 	MessageGroup := r.Group("/api/v1/message")
 	{
 		MessageGroup.POST("", messageHandler.Create)
+		MessageGroup.GET("", messageHandler.FindAll)
 	}
 }
