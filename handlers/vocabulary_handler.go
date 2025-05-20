@@ -33,6 +33,7 @@ func (hdl *VocabularyHandler) Create(ctx *gin.Context) {
 		Definition    string `json:"definition" binding:"required"`
 		Example       string `json:"example"`
 		Pronunciation string `json:"pronunciation"`
+		TopicIds      []uint `json:"topic_ids"`
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -40,19 +41,18 @@ func (hdl *VocabularyHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	vocab, err := ucCreate.Execute(ctx, entities.Vocabulary{
-		Name:          input.Name,
-		Definition:    input.Definition,
-		Example:       input.Example,
-		Pronunciation: input.Pronunciation,
-	})
+	vocab, err := ucCreate.Execute(ctx, input.Name,
+		input.Definition,
+		input.Example,
+		input.Pronunciation,
+		input.TopicIds)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, vocab)
+	ctx.JSON(http.StatusCreated, gin.H{"vocabulary": vocab, "message": "Vocabulary created successfully"})
 }
 
 func (hdl *VocabularyHandler) Find(ctx *gin.Context) {
@@ -106,6 +106,7 @@ func (hdl *VocabularyHandler) UpdateById(ctx *gin.Context) {
 		Definition    string `json:"definition"`
 		Example       string `json:"example"`
 		Pronunciation string `json:"pronunciation"`
+		TopicIds      []uint `json:"topic_ids"`
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -113,17 +114,11 @@ func (hdl *VocabularyHandler) UpdateById(ctx *gin.Context) {
 		return
 	}
 
-	vocab := entities.Vocabulary{
-		Name:          input.Name,
-		Definition:    input.Definition,
-		Example:       input.Example,
-		Pronunciation: input.Pronunciation,
-	}
-
-	if err := ucUpdate.Execute(ctx, id, &vocab); err != nil {
+	vocab, err := ucUpdate.Execute(ctx, id, input.Name, input.Definition, input.Example, input.Pronunciation, input.TopicIds)
+	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Vocabulary updated successfully"})
+	ctx.JSON(http.StatusOK, gin.H{"vocabulary": vocab, "message": "Vocabulary updated successfully"})
 }

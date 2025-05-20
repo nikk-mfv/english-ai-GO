@@ -8,5 +8,5 @@ type Vocabulary struct {
 	Definition    string   `gorm:"type:text;not null" json:"definition"`
 	Example       string   `gorm:"type:text" json:"example"`
 	Pronunciation string   `gorm:"type:text" json:"pronunciation"`
-	Topics        []*Topic `gorm:"many2many:topic_vocubularies;"`
+	Topics        []*Topic `gorm:"many2many:topic_vocabularies;constraint:OnDelete:CASCADE"`
 }
