@@ -22,4 +22,5 @@ type ITopicRepository interface {
 	CountTotal(ctx context.Context) (uint32, error)
 	Create(ctx context.Context, topic *entities.Topic) error
 	GetByPage(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, error)
+	UpdateByID(ctx context.Context, id string, name string) (entities.Topic, error)
 }
