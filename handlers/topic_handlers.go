@@ -117,6 +117,7 @@ func (hd1 *topicHandler) UpdateById(ctx *gin.Context) {
 
 func (hd1 *topicHandler) DeleteById(ctx *gin.Context) {
 	topicId := ctx.Param("id")
+
 	if topicId == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid topic id"})
 		return
