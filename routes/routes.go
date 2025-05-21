@@ -3,6 +3,8 @@ package routes
 import (
 	"englishAI/handlers"
 
+	"englishAI/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,6 +37,8 @@ func Routes(r *gin.Engine) {
 	userHandler := handlers.NewUserHandler()
 	UserGroup := r.Group("/api/v1/user")
 	{
-		UserGroup.POST("", userHandler.Create)
+		UserGroup.POST("/register", userHandler.SignUp)
+		UserGroup.POST("/login", userHandler.Login)
+		UserGroup.GET("/profile", middleware.AuthMiddleware(), userHandler.Profile)
 	}
 }
