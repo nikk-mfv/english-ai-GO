@@ -37,8 +37,8 @@ func Routes(r *gin.Engine) {
 	userHandler := handlers.NewUserHandler()
 	UserGroup := r.Group("/api/v1/user")
 	{
-		UserGroup.POST("/register", userHandler.SignUp)
-		UserGroup.POST("/login", userHandler.Login)
+		UserGroup.POST("/create-account", userHandler.SignUp)
+		UserGroup.POST("/log-in", userHandler.Login)
 		UserGroup.GET("/profile", middleware.AuthMiddleware(), userHandler.Profile)
 	}
 }
