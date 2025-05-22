@@ -21,7 +21,7 @@ func (r *vocabularyRepository) Count(ctx context.Context) (uint32, error) {
 	return uint32(count), nil
 }
 
-func (r *vocabularyRepository) Create(ctx context.Context, name string, definition string, example string, pronunciation string, topicIds []uint) (entities.Vocabulary, error) {
+func (r *vocabularyRepository) Create(ctx context.Context, name string, definition string, example string, pronunciation string, topicIds []uint, userID uint) (entities.Vocabulary, error) {
 	var db = config.GetDatabase()
 
 	var topics []*entities.Topic
@@ -35,6 +35,7 @@ func (r *vocabularyRepository) Create(ctx context.Context, name string, definiti
 		Example:       example,
 		Pronunciation: pronunciation,
 		Topics:        topics,
+		UserID:        userID,
 	}
 
 	if err := db.Create(&newVocab).Error; err != nil {
@@ -44,10 +45,11 @@ func (r *vocabularyRepository) Create(ctx context.Context, name string, definiti
 	return newVocab, nil
 }
 
-func (r *vocabularyRepository) GetAll(ctx context.Context, paging entities.PagingRequest) ([]entities.Vocabulary, error) {
+func (r *vocabularyRepository) GetAll(ctx context.Context, paging entities.PagingRequest, userID uint) ([]entities.Vocabulary, error) {
 	var vocabularies []entities.Vocabulary
 
 	GormPaging := paging.GormPaging(config.GetDatabase())
+	GormPaging = GormPaging.Where("user_id = ?", userID)
 
 	if err := GormPaging.Preload("Topics").Find(&vocabularies).Error; err != nil {
 		return nil, err

@@ -6,6 +6,7 @@ import (
 	"englishAI/usecase"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,8 +32,7 @@ func NewTopicHandler() *topicHandler {
 
 func (hd1 *topicHandler) Create(ctx *gin.Context) {
 	var topicInput struct {
-		Name   string `json:"name" binding:"required"`
-		UserID uint   `json:"user_id" binding:"required"`
+		Name string `json:"name" binding:"required"`
 	}
 
 	// Bind JSON to newtopic
@@ -41,14 +41,20 @@ func (hd1 *topicHandler) Create(ctx *gin.Context) {
 		return
 	}
 
+	userID := ctx.GetUint("user_id")
+
 	newTopic := entities.Topic{
 		Name:   topicInput.Name,
-		UserID: topicInput.UserID,
+		UserID: userID,
 	}
 
 	//add new topic to database
 	createdTopic, err := ucCreateTopic.Execute(ctx, newTopic)
 	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "topic already exists"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot create new topic: " + err.Error()})
 		return
 	}
@@ -78,7 +84,9 @@ func (hd1 *topicHandler) Find(ctx *gin.Context) {
 		Size: uint32(size),
 	}
 
-	topics, total, err := ucFindTopicsByPage.Execute(ctx, paging)
+	userID := ctx.GetUint("user_id")
+
+	topics, total, err := ucFindTopicsByPage.Execute(ctx, paging, userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot find topics: " + err.Error()})
 		return

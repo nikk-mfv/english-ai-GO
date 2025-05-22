@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -83,6 +84,10 @@ func (h *userHandler) SignUp(ctx *gin.Context) {
 	}
 
 	if err := ucUserCreate.Execute(ctx, user); err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username already exists"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

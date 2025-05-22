@@ -15,7 +15,7 @@ func NewTopicFindUseCase(topicRepo repository.ITopicRepository) ITopicFindUsecas
 	return &topicFindUseCase{topicRepo: topicRepo}
 }
 
-func (uc *topicFindUseCase) Execute(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, uint32, error) {
+func (uc *topicFindUseCase) Execute(ctx context.Context, paging entities.PagingRequest, userId uint) ([]entities.Topic, uint32, error) {
 	total, err := uc.topicRepo.CountTotal(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("can not find topics: %w", err)
@@ -25,7 +25,7 @@ func (uc *topicFindUseCase) Execute(ctx context.Context, paging entities.PagingR
 		return []entities.Topic{}, 0, nil
 	}
 
-	res, err := uc.topicRepo.GetByPage(ctx, paging)
+	res, err := uc.topicRepo.GetByPage(ctx, paging, userId)
 	if err != nil {
 		return nil, 0, fmt.Errorf("can not get topics: %w", err)
 	}

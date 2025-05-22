@@ -11,6 +11,7 @@ import (
 func Routes(r *gin.Engine) {
 	topicHandler := handlers.NewTopicHandler()
 	TopicGroup := r.Group("/api/v1/topic")
+	TopicGroup.Use(middleware.AuthMiddleware())
 	{
 		TopicGroup.POST("", topicHandler.Create)
 		TopicGroup.GET("", topicHandler.Find)
@@ -20,6 +21,7 @@ func Routes(r *gin.Engine) {
 
 	vocabHandler := handlers.VocabularyHandler{}
 	VocabGroup := r.Group("/api/v1/vocab")
+	VocabGroup.Use(middleware.AuthMiddleware())
 	{
 		VocabGroup.POST("", vocabHandler.Create)
 		VocabGroup.GET("", vocabHandler.Find)

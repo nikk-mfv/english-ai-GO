@@ -6,11 +6,11 @@ import (
 )
 
 type IVocabularyCreateUsecase interface {
-	Execute(ctx context.Context, name string, definition string, example string, pronunciation string, topicIds []uint) (entities.Vocabulary, error)
+	Execute(ctx context.Context, name string, definition string, example string, pronunciation string, topicIds []uint, userID uint) (entities.Vocabulary, error)
 }
 
 type IVocabularyFindUsecase interface {
-	Execute(ctx context.Context, paging entities.PagingRequest) ([]entities.Vocabulary, uint32, error)
+	Execute(ctx context.Context, paging entities.PagingRequest, userID uint) ([]entities.Vocabulary, uint32, error)
 }
 
 type IVocabularyDeleteUsecase interface {
@@ -36,7 +36,7 @@ type ITopicCreateUsecase interface {
 }
 
 type ITopicFindUsecase interface {
-	Execute(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, uint32, error)
+	Execute(ctx context.Context, paging entities.PagingRequest, userId uint) ([]entities.Topic, uint32, error)
 }
 
 type ITopicUpdateUsecase interface {

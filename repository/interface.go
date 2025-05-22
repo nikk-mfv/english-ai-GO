@@ -7,8 +7,8 @@ import (
 
 type IVocabularyRepository interface {
 	Count(ctx context.Context) (uint32, error)
-	Create(ctx context.Context, name string, definition string, example string, pronunciation string, topicIds []uint) (entities.Vocabulary, error)
-	GetAll(ctx context.Context, paging entities.PagingRequest) ([]entities.Vocabulary, error)
+	Create(ctx context.Context, name string, definition string, example string, pronunciation string, topicIds []uint, userID uint) (entities.Vocabulary, error)
+	GetAll(ctx context.Context, paging entities.PagingRequest, userID uint) ([]entities.Vocabulary, error)
 	DeleteByID(ctx context.Context, id string) error
 	UpdateByID(ctx context.Context, id string, name string, definition string, example string, pronunciation string, topicIds []uint) (entities.Vocabulary, error)
 }
@@ -21,7 +21,7 @@ type IConversationRepository interface {
 type ITopicRepository interface {
 	CountTotal(ctx context.Context) (uint32, error)
 	Create(ctx context.Context, topic *entities.Topic) error
-	GetByPage(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, error)
+	GetByPage(ctx context.Context, paging entities.PagingRequest, userId uint) ([]entities.Topic, error)
 	UpdateByID(ctx context.Context, id string, name string) (entities.Topic, error)
 	DeleteByID(ctx context.Context, id string) error
 }
