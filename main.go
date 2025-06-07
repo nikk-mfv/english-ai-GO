@@ -14,6 +14,8 @@ func main() {
 	log.Println("Starting server...")
 	config.ConnectDatabase()
 
+	config.ConnectGenAi()
+
 	migrations.Migrate()
 
 	log.Println("Connected to the database!")

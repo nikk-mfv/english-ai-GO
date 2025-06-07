@@ -42,3 +42,7 @@ type ITopicFindUsecase interface {
 type ITopicUpdateUsecase interface {
 	Execute(ctx context.Context, id string, name string) (entities.Topic, error)
 }
+
+type ITopicFindAllUsecase interface {
+	Execute(userId int) ([]entities.Conversation, error)
+}
