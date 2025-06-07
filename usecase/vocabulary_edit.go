@@ -17,13 +17,14 @@ func NewVocabularyUpdateUsecase(vocabularyRepo repository.IVocabularyRepository)
 	}
 }
 
-func (uc *vocabularyUpdateUsecase) Execute(ctx context.Context, id string, obj *entities.Vocabulary) error {
+func (uc *vocabularyUpdateUsecase) Execute(ctx context.Context, id string, name string, definition string, example string, pronunciation string, topicIds []uint) (entities.Vocabulary, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	if err := uc.vocabularyRepo.UpdateByID(ctx, id, obj); err != nil {
-		return err
+	var vocab, err = uc.vocabularyRepo.UpdateByID(ctx, id, name, definition, example, pronunciation, topicIds)
+	if err != nil {
+		return entities.Vocabulary{}, err
 	}
 
-	return uc.vocabularyRepo.UpdateByID(ctx, id, obj)
+	return vocab, nil
 }

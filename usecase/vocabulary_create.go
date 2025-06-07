@@ -19,13 +19,14 @@ func NewVocabularyCreateUsecase(
 	}
 }
 
-func (uc *vocabularyCreateUsecase) Execute(ctx context.Context, newVocabulary entities.Vocabulary) (entities.Vocabulary, error) {
+func (uc *vocabularyCreateUsecase) Execute(ctx context.Context, name string, definition string, example string, pronunciation string, topicIds []uint) (entities.Vocabulary, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	if err := uc.vocabularyRepo.Create(ctx, &newVocabulary); err != nil {
+	vocab, err := uc.vocabularyRepo.Create(ctx, name, definition, example, pronunciation, topicIds)
+
+	if err != nil {
 		return entities.Vocabulary{}, err
 	}
-
-	return newVocabulary, nil
+	return vocab, nil
 }
