@@ -46,6 +46,14 @@ type ITopicUpdateUsecase interface {
 type ITopicDeleteUsecase interface {
 	Execute(ctx context.Context, id string) error
 }
+
+type IUserCreateUsecase interface {
+	Execute(ctx context.Context, user entities.User) error
+}
+
+type IUserFindUsecase interface {
+	Execute(ctx context.Context, username string) (*entities.User, error)
+}
 type ITopicFindAllUsecase interface {
 	Execute(userId int) ([]entities.Conversation, error)
 }

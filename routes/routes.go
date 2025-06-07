@@ -41,4 +41,10 @@ func Routes(r *gin.Engine) {
 		MessageGroup.POST("", messageHandler.Create)
 		MessageGroup.GET("", messageHandler.FindAll)
 	}
+
+	userHandler := handlers.NewUserHandler()
+	UserGroup := r.Group("/api/v1/user")
+	{
+		UserGroup.POST("", userHandler.Create)
+	}
 }

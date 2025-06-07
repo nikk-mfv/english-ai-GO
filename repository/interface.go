@@ -26,3 +26,8 @@ type ITopicRepository interface {
 	UpdateByID(ctx context.Context, id string, name string) (entities.Topic, error)
 	DeleteByID(ctx context.Context, id string) error
 }
+
+type IUserRepository interface {
+	Create(ctx context.Context, user *entities.User) error
+	FindByUsername(ctx context.Context, username string) (*entities.User, error)
+}
