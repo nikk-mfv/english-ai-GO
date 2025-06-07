@@ -21,3 +21,16 @@ func (r *conversationRepository) Find(id string) (entities.Conversation, error) 
 	err := config.GetDatabase().Preload("User").First(&conversation, id).Error
 	return conversation, err
 }
+
+func (r *conversationRepository) FindAll(userId int) ([]entities.Conversation, error) {
+	var conversations []entities.Conversation
+	err := config.GetDatabase().
+		Where("user_id = ?", userId).
+		Find(&conversations).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return conversations, nil
+}

@@ -16,6 +16,7 @@ type IVocabularyRepository interface {
 type IConversationRepository interface {
 	Create(ctx context.Context, obj *entities.Conversation) error
 	Find(id string) (entities.Conversation, error)
+	FindAll(userId int) ([]entities.Conversation, error)
 }
 
 type ITopicRepository interface {

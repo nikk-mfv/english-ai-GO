@@ -23,6 +23,7 @@ var conversationRepo = repository.NewConversationRepository()
 // conversation usecase
 var createUsecase = usecase.NewConversationCreateUsecase(conversationRepo)
 var findUsecase = usecase.NewConversationFindUseCase(conversationRepo)
+var findAllUsecase = usecase.NewConversationFindAllUsecase(conversationRepo)
 
 func (h *conversationHandler) Find(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -66,4 +67,19 @@ func (h *conversationHandler) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": conversation})
+}
+
+func (h *conversationHandler) FindAll(ctx *gin.Context) {
+	var userLoggedId int = 1 // TODO: handle after authentication
+	var conversations = []entities.Conversation{}
+
+	// call usecase
+	conversations, err := findAllUsecase.Execute(userLoggedId)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, entities.Response{
+		Data: conversations,
+	})
 }
