@@ -38,3 +38,18 @@ func (r *topicRepository) GetByPage(ctx context.Context, paging entities.PagingR
 
 	return topics, nil
 }
+
+func (r *topicRepository) UpdateByID(ctx context.Context, id string, name string) (entities.Topic, error) {
+	var topic entities.Topic
+	db := config.GetDatabase()
+
+	if err := db.Model(&topic).Where("id = ?", id).Updates(entities.Topic{Name: name}).Error; err != nil {
+		return topic, err
+	}
+
+	if err := db.Where("id = ?", id).First(&topic).Error; err != nil {
+		return topic, err
+	}
+
+	return topic, nil
+}

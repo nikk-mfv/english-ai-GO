@@ -12,6 +12,7 @@ func Routes(r *gin.Engine) {
 	{
 		TopicGroup.POST("", topicHandler.Create)
 		TopicGroup.GET("", topicHandler.Find)
+		TopicGroup.PUT("/:id", topicHandler.UpdateById)
 	}
 
 	vocabHandler := handlers.VocabularyHandler{}

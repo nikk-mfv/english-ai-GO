@@ -21,6 +21,7 @@ var (
 	// usecase
 	ucCreateTopic      = usecase.NewTopicCreateUsecase(topicRepository)
 	ucFindTopicsByPage = usecase.NewTopicFindUseCase(topicRepository)
+	ucUpdateTopic      = usecase.NewTopicUpdateUsecase(topicRepository)
 )
 
 func NewTopicHandler() *topicHandler {
@@ -86,4 +87,29 @@ func (hd1 *topicHandler) Find(ctx *gin.Context) {
 		Data:   topics,
 		Paging: entities.ResponsePaging{Total: total},
 	})
+}
+
+func (hd1 *topicHandler) UpdateById(ctx *gin.Context) {
+	topicId := ctx.Param("id")
+	if topicId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid topic id"})
+		return
+	}
+
+	var topicInput struct {
+		Name string `json:"name" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&topicInput); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request data" + err.Error()})
+		return
+	}
+
+	updatedTopic, err := ucUpdateTopic.Execute(ctx, topicId, topicInput.Name)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot update topic: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"topic": updatedTopic, "message": "topic updated successfully"})
 }
