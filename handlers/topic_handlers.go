@@ -22,6 +22,7 @@ var (
 	ucCreateTopic      = usecase.NewTopicCreateUsecase(topicRepository)
 	ucFindTopicsByPage = usecase.NewTopicFindUseCase(topicRepository)
 	ucUpdateTopic      = usecase.NewTopicUpdateUsecase(topicRepository)
+	ucDeleteTopic      = usecase.NewTopicDeleteUsecase(topicRepository)
 )
 
 func NewTopicHandler() *topicHandler {
@@ -112,4 +113,21 @@ func (hd1 *topicHandler) UpdateById(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"topic": updatedTopic, "message": "topic updated successfully"})
+}
+
+func (hd1 *topicHandler) DeleteById(ctx *gin.Context) {
+	topicId := ctx.Param("id")
+	if topicId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid topic id"})
+		return
+	}
+
+	err := ucDeleteTopic.Execute(ctx, topicId)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot delete topic: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "topic deleted successfully"})
 }

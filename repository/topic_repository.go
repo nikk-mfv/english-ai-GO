@@ -53,3 +53,18 @@ func (r *topicRepository) UpdateByID(ctx context.Context, id string, name string
 
 	return topic, nil
 }
+
+func (r *topicRepository) DeleteByID(ctx context.Context, id string) error {
+	db := config.GetDatabase()
+	var topic entities.Topic
+
+	if err := db.Where("id = ?", id).First(&topic).Error; err != nil {
+		return err
+	}
+
+	if err := db.Unscoped().Where("id = ?", id).Delete(&topic).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

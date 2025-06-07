@@ -24,4 +24,5 @@ type ITopicRepository interface {
 	Create(ctx context.Context, topic *entities.Topic) error
 	GetByPage(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, error)
 	UpdateByID(ctx context.Context, id string, name string) (entities.Topic, error)
+	DeleteByID(ctx context.Context, id string) error
 }

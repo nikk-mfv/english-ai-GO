@@ -56,6 +56,10 @@ func (r *vocabularyRepository) GetAll(ctx context.Context, paging entities.Pagin
 }
 
 func (r *vocabularyRepository) DeleteByID(ctx context.Context, id string) error {
+	if err := config.GetDatabase().First(&entities.Vocabulary{}, "id = ?", id).Error; err != nil {
+		return err
+	}
+
 	return config.GetDatabase().Unscoped().Where("id = ?", id).Delete(&entities.Vocabulary{}).Error
 }
 
