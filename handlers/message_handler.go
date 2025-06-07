@@ -75,3 +75,19 @@ func (h *messageHandler) Create(ctx *gin.Context) {
 		Data: aiMess,
 	})
 }
+
+var findMessageUsecase = usecase.NewMessageFindUseCase(messageRepo)
+
+func (h *messageHandler) FindAll(ctx *gin.Context) {
+	conversationId := ctx.Query("conversation_id")
+
+	messages, err := findMessageUsecase.Execute(conversationId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, entities.Response{
+		Data: messages,
+	})
+}
