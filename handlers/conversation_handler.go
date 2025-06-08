@@ -46,8 +46,7 @@ func (h *conversationHandler) Find(ctx *gin.Context) {
 
 func (h *conversationHandler) Create(c *gin.Context) {
 	var input struct {
-		Name   string `json:"name" binding:"required"`
-		UserID uint   `json:"user_id" binding:"required"`
+		Name string `json:"name" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -55,9 +54,10 @@ func (h *conversationHandler) Create(c *gin.Context) {
 		return
 	}
 
+	UserIDLogged := c.GetUint("user_id")
 	conversation := entities.Conversation{
 		Name:   input.Name,
-		UserID: input.UserID,
+		UserID: UserIDLogged,
 	}
 
 	conversation, err := createUsecase.Execute(c, conversation)
@@ -70,11 +70,11 @@ func (h *conversationHandler) Create(c *gin.Context) {
 }
 
 func (h *conversationHandler) FindAll(ctx *gin.Context) {
-	var userLoggedId int = 1 // TODO: handle after authentication
+	UserIDLogged := ctx.GetUint("user_id")
 	var conversations = []entities.Conversation{}
 
 	// call usecase
-	conversations, err := findAllUsecase.Execute(userLoggedId)
+	conversations, err := findAllUsecase.Execute(UserIDLogged)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

@@ -5,7 +5,6 @@ import (
 	"englishAI/external"
 	"englishAI/repository"
 	"englishAI/usecase"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +28,8 @@ func (h *messageHandler) Create(ctx *gin.Context) {
 		ConversationID uint   `json:"conversation_id" binding:"required"`
 	}
 
+	UserIDLogged := ctx.GetUint("user_id")
+
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -38,10 +39,8 @@ func (h *messageHandler) Create(ctx *gin.Context) {
 		Message:        input.Message,
 		ConversationID: input.ConversationID,
 		IsHuman:        true,
-		UserID:         1, // TODO: fix it after handling AUTHENTICATE
+		UserID:         UserIDLogged,
 	}
-
-	log.Printf(newMess.Message)
 
 	// call usecase to store message from human
 	err := createMessageUsecase.Execute(newMess)
@@ -61,7 +60,7 @@ func (h *messageHandler) Create(ctx *gin.Context) {
 		Message:        aiMessStr,
 		ConversationID: input.ConversationID,
 		IsHuman:        false,
-		UserID:         1, // TODO: fix it after handling AUTHENTICATE
+		UserID:         UserIDLogged, // TODO: fix it after handling AUTHENTICATE
 	}
 
 	err = createMessageUsecase.Execute(aiMess)

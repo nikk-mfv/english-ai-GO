@@ -22,7 +22,7 @@ func (r *conversationRepository) Find(id string) (entities.Conversation, error) 
 	return conversation, err
 }
 
-func (r *conversationRepository) FindAll(userId int) ([]entities.Conversation, error) {
+func (r *conversationRepository) FindAll(userId uint) ([]entities.Conversation, error) {
 	var conversations []entities.Conversation
 	err := config.GetDatabase().
 		Where("user_id = ?", userId).
