@@ -55,5 +55,5 @@ type IUserFindUsecase interface {
 	Execute(ctx context.Context, username string) (*entities.User, error)
 }
 type ITopicFindAllUsecase interface {
-	Execute(userId int) ([]entities.Conversation, error)
+	Execute(userId uint) ([]entities.Conversation, error)
 }

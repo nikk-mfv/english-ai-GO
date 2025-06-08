@@ -13,7 +13,7 @@ func NewConversationFindAllUsecase(repo repository.IConversationRepository) ITop
 	return &conversationFindAllUsecase{conversationRepo: repo}
 }
 
-func (uc *conversationFindAllUsecase) Execute(userId int) ([]entities.Conversation, error) {
+func (uc *conversationFindAllUsecase) Execute(userId uint) ([]entities.Conversation, error) {
 	conversations, err := uc.conversationRepo.FindAll(userId)
 	return conversations, err
 }
