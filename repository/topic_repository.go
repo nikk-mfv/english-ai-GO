@@ -27,11 +27,13 @@ func (r *topicRepository) Create(ctx context.Context, newtopic *entities.Topic) 
 	return config.GetDatabase().Create(newtopic).Error
 }
 
-func (r *topicRepository) GetByPage(ctx context.Context, paging entities.PagingRequest) ([]entities.Topic, error) {
+func (r *topicRepository) GetByPage(ctx context.Context, paging entities.PagingRequest, userId uint) ([]entities.Topic, error) {
 	db := config.GetDatabase()
 
 	var topics []entities.Topic
 	gormPaging := paging.GormPaging(db)
+	gormPaging = gormPaging.Where("user_id = ?", userId)
+
 	if err := gormPaging.Find(&topics).Error; err != nil {
 		return nil, err
 	}

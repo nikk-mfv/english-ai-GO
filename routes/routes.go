@@ -3,12 +3,15 @@ package routes
 import (
 	"englishAI/handlers"
 
+	"englishAI/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
 func Routes(r *gin.Engine) {
 	topicHandler := handlers.NewTopicHandler()
 	TopicGroup := r.Group("/api/v1/topic")
+	TopicGroup.Use(middleware.AuthMiddleware())
 	{
 		TopicGroup.POST("", topicHandler.Create)
 		TopicGroup.GET("", topicHandler.Find)
@@ -18,6 +21,7 @@ func Routes(r *gin.Engine) {
 
 	vocabHandler := handlers.VocabularyHandler{}
 	VocabGroup := r.Group("/api/v1/vocab")
+	VocabGroup.Use(middleware.AuthMiddleware())
 	{
 		VocabGroup.POST("", vocabHandler.Create)
 		VocabGroup.GET("", vocabHandler.Find)
@@ -45,6 +49,8 @@ func Routes(r *gin.Engine) {
 	userHandler := handlers.NewUserHandler()
 	UserGroup := r.Group("/api/v1/user")
 	{
-		UserGroup.POST("", userHandler.Create)
+		UserGroup.POST("/create-account", userHandler.SignUp)
+		UserGroup.POST("/log-in", userHandler.Login)
+		UserGroup.GET("/profile", middleware.AuthMiddleware(), userHandler.Profile)
 	}
 }

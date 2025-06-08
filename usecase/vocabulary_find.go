@@ -15,7 +15,7 @@ func NewVocabularyFindUsecase(vocabularyRepo repository.IVocabularyRepository) I
 	return &vocabularyFindUsecase{vocabularyRepo: vocabularyRepo}
 }
 
-func (uc *vocabularyFindUsecase) Execute(ctx context.Context, paging entities.PagingRequest) ([]entities.Vocabulary, uint32, error) {
+func (uc *vocabularyFindUsecase) Execute(ctx context.Context, paging entities.PagingRequest, userID uint) ([]entities.Vocabulary, uint32, error) {
 	total, err := uc.vocabularyRepo.Count(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("can not find vocab: %w", err)
@@ -25,7 +25,7 @@ func (uc *vocabularyFindUsecase) Execute(ctx context.Context, paging entities.Pa
 		return nil, 0, nil
 	}
 
-	res, err := uc.vocabularyRepo.GetAll(ctx, paging)
+	res, err := uc.vocabularyRepo.GetAll(ctx, paging, userID)
 
 	if err != nil {
 		return nil, 0, fmt.Errorf("can not get vocab: %w", err)

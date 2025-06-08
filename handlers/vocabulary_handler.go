@@ -6,6 +6,7 @@ import (
 	"englishAI/usecase"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,13 +42,19 @@ func (hdl *VocabularyHandler) Create(ctx *gin.Context) {
 		return
 	}
 
+	userID := ctx.GetUint("user_id")
 	vocab, err := ucCreate.Execute(ctx, input.Name,
 		input.Definition,
 		input.Example,
 		input.Pronunciation,
-		input.TopicIds)
+		input.TopicIds,
+		userID)
 
 	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Vocabulary already exists"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -75,7 +82,9 @@ func (hdl *VocabularyHandler) Find(ctx *gin.Context) {
 		Page: uint32(page),
 		Size: uint32(size),
 	}
-	vocab, total, err := ucFind.Execute(ctx, paging)
+
+	userID := ctx.GetUint("user_id")
+	vocab, total, err := ucFind.Execute(ctx, paging, userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

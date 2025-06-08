@@ -15,7 +15,6 @@ func NewTopicCreateUsecase(topicRepository repository.ITopicRepository) ITopicCr
 }
 
 func (uc *topicCreateUsecase) Execute(ctx context.Context, topic entities.Topic) (entities.Topic, error) {
-
 	if err := uc.topicRepository.Create(ctx, &topic); err != nil {
 		return entities.Topic{}, err
 	}
