@@ -8,6 +8,7 @@ import (
 	"os"
 
 	mysqlDriver "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -17,6 +18,9 @@ var (
 )
 
 func ConnectDatabase() {
+	// Load .env if available
+	_ = godotenv.Load()
+
 	caCert := os.Getenv("CA_CERT")
 	if caCert == "" {
 		log.Fatal("missing CA_CERT env")
