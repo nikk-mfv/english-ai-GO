@@ -25,7 +25,7 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173, https://english-ai-fe-release.vercel.app/"},
+		AllowOrigins:     []string{"http://localhost:5173, https://english-ai-fe-release.vercel.app"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
