@@ -5,17 +5,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"google.golang.org/genai"
 )
 
 var genAiSer *genai.Chat
 
 func ConnectGenAi() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	ctx := context.Background()
 	apiKey := os.Getenv("GEMINI_API_KEY")
 
