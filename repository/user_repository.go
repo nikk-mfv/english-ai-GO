@@ -28,3 +28,9 @@ func (r *userRepository) FindByUsername(ctx context.Context, username string) (*
 
 	return &user, nil
 }
+
+func (r *userRepository) UploadAvatar(ctx context.Context, userID uint, imageURL string) error {
+	db := config.GetDatabase()
+
+	return db.Model(&entities.User{}).Where("id = ?", userID).Update("ImageURL", imageURL).Error
+}

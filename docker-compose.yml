@@ -13,5 +13,14 @@ services:
       - db_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  localstack:
+      image: localstack/localstack
+      environment:
+        - SERVICES=s3
+        - DEFAULT_REGION=us-east-1
+      ports:
+        - "4566:4566" # Edge port
+      volumes:
+        - "./localstack:/var/lib/localstack"
 volumes:
   db_data:

@@ -13,7 +13,7 @@ import (
 func main() {
 	log.Println("Starting server...")
 	config.ConnectDatabase()
-
+	config.InitS3Client()
 	config.ConnectGenAi()
 
 	migrations.Migrate()
