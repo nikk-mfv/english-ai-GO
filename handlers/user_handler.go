@@ -212,7 +212,7 @@ func (h *userHandler) UploadAvatar(ctx *gin.Context) {
 		return
 	}
 
-	avatarURL := fmt.Sprintf("http://localhost:4566/%s/%s", bucket, fileKey)
+	avatarURL := fmt.Sprintf("%s/%s", bucket, fileKey)
 
 	// Save avatar URL to user profile
 	uid, ok := userID.(uint)
