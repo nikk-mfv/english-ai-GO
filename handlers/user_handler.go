@@ -31,6 +31,7 @@ var userRepo = repository.NewUserRepository()
 var ucUserCreate = usecase.NewUserCreateUsecase(userRepo)
 var ucUserFind = usecase.NewUserFindUsecase(userRepo)
 var ucUserUploadAvatar = usecase.NewUserUploadAvatarUsecase(userRepo)
+var ucUserProfile = usecase.NewUserProfileUsecase(userRepo)
 
 func NewUserHandler() *userHandler {
 	return &userHandler{}
@@ -200,6 +201,12 @@ func (h *userHandler) UploadAvatar(ctx *gin.Context) {
 		bucket = "avatar-bucket"
 	}
 	fmt.Println("Using bucket:", bucket)
+
+	if !config.BucketExists(s3cli, bucket) {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Bucket does not exist"})
+		return
+	}
+
 	_, err = s3cli.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      &bucket,
 		Key:         &fileKey,
@@ -235,15 +242,16 @@ func (h *userHandler) UploadAvatar(ctx *gin.Context) {
 
 func (h *userHandler) Profile(ctx *gin.Context) {
 	userID := ctx.MustGet("user_id").(uint)
-	username := ctx.MustGet("username").(string)
-	imageURL, ok := ctx.Get("image_url")
-	if !ok {
-		imageURL = nil
+
+	user, err := ucUserProfile.Execute(ctx, userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving user profile"})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"user_id":   userID,
-		"username":  username,
-		"image_url": imageURL,
+		"user_id":   user.ID,
+		"username":  user.Username,
+		"image_url": user.ImageURL,
 	})
 }

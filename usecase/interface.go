@@ -63,3 +63,7 @@ type IUserFindUsecase interface {
 type IUserUploadAvatarUsecase interface {
 	Execute(ctx context.Context, userID uint, imageURL string) error
 }
+
+type IUserProfileUsecase interface {
+	Execute(ctx context.Context, userID uint) (*entities.User, error)
+}

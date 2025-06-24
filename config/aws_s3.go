@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 var s3Client *s3.Client
@@ -53,4 +55,18 @@ func GetS3Client() *s3.Client {
 		log.Fatal("S3 Client not initialized. Call InitS3Client() first.")
 	}
 	return s3Client
+}
+
+func BucketExists(s3cli *s3.Client, bucket string) bool {
+	_, err := s3cli.HeadBucket(context.TODO(), &s3.HeadBucketInput{
+		Bucket: &bucket,
+	})
+	var nbe *s3types.NotFound
+	if errors.As(err, &nbe) {
+		return false
+	}
+	if err != nil {
+		return false
+	}
+	return true
 }
