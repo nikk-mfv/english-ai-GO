@@ -13,5 +13,17 @@ services:
       - db_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  localstack:
+      image: localstack/localstack
+      environment:
+        - SERVICES=s3
+        - DEFAULT_REGION=ap-southeast-1
+      ports:
+        - "4566:4566" # Edge port
+      volumes:
+        - "./localstack:/var/lib/localstack"
 volumes:
   db_data:
+
+# Create  bucket: 
+# awslocal s3 mb s3://avatar-bucket --region ap-southeast-1

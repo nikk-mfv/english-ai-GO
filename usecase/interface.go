@@ -47,6 +47,11 @@ type ITopicDeleteUsecase interface {
 	Execute(ctx context.Context, id string) error
 }
 
+type ITopicFindAllUsecase interface {
+	Execute(userId uint) ([]entities.Conversation, error)
+}
+
+// User
 type IUserCreateUsecase interface {
 	Execute(ctx context.Context, user entities.User) error
 }
@@ -54,6 +59,11 @@ type IUserCreateUsecase interface {
 type IUserFindUsecase interface {
 	Execute(ctx context.Context, username string) (*entities.User, error)
 }
-type ITopicFindAllUsecase interface {
-	Execute(userId uint) ([]entities.Conversation, error)
+
+type IUserUploadAvatarUsecase interface {
+	Execute(ctx context.Context, userID uint, imageURL string) error
+}
+
+type IUserProfileUsecase interface {
+	Execute(ctx context.Context, userID uint) (*entities.User, error)
 }

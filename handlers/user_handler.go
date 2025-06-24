@@ -1,15 +1,24 @@
 package handlers
 
 import (
+	"bytes"
+	"context"
+	"englishAI/config"
 	"englishAI/entities"
 	"englishAI/repository"
 	"englishAI/usecase"
 	"englishAI/utils"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,9 +28,10 @@ type userHandler struct {
 }
 
 var userRepo = repository.NewUserRepository()
-
 var ucUserCreate = usecase.NewUserCreateUsecase(userRepo)
 var ucUserFind = usecase.NewUserFindUsecase(userRepo)
+var ucUserUploadAvatar = usecase.NewUserUploadAvatarUsecase(userRepo)
+var ucUserProfile = usecase.NewUserProfileUsecase(userRepo)
 
 func NewUserHandler() *userHandler {
 	return &userHandler{}
@@ -125,12 +135,123 @@ func (h *userHandler) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": token})
 }
 
-func (h *userHandler) Profile(ctx *gin.Context) {
-	userID := ctx.MustGet("user_id").(uint)
-	username := ctx.MustGet("username").(string)
+// Content-Type file extension
+func getContentTypeByExt(ext string) string {
+	switch ext {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	default:
+		return "application/octet-stream"
+	}
+}
+
+func (h *userHandler) UploadAvatar(ctx *gin.Context) {
+	userID, ok := ctx.Get("user_id")
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// open file from form-data
+	file, err := ctx.FormFile("avatar")
+	if err != nil {
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
+		return
+	}
+
+	// Check file size(5MB limit)
+	if file.Size > 5*1024*1024 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "File size exceeds 5MB"})
+		return
+	}
+
+	// Check format (allow jpg, jpeg, png)
+	ext := filepath.Ext(file.Filename)
+	allowedExt := map[string]bool{".jpg": true, ".jpeg": true, ".png": true}
+	if !allowedExt[ext] {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type. Only jpg, jpeg, png allowed"})
+		return
+	}
+
+	// Open file
+	src, err := file.Open()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error opening file"})
+		return
+	}
+	defer src.Close()
+
+	// read all file in memory
+	fileBytes, err := io.ReadAll(src)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error reading file"})
+		return
+	}
+
+	// create S3 key
+	fileKey := fmt.Sprintf("avatars/%d_%d%s", time.Now().Unix(), userID, ext)
+
+	// Upload to S3
+	s3cli := config.GetS3Client()
+	bucket := os.Getenv("AVATAR_BUCKET")
+	if bucket == "" {
+		bucket = "avatar-bucket"
+	}
+	fmt.Println("Using bucket:", bucket)
+
+	if !config.BucketExists(s3cli, bucket) {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Bucket does not exist"})
+		return
+	}
+
+	_, err = s3cli.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket:      &bucket,
+		Key:         &fileKey,
+		Body:        bytes.NewReader(fileBytes),
+		ContentType: aws.String(getContentTypeByExt(ext)),
+	})
+	if err != nil {
+		fmt.Println("S3 Upload error:", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Upload to S3 failed"})
+		return
+	}
+
+	avatarURL := fmt.Sprintf("%s/%s", bucket, fileKey)
+
+	// Save avatar URL to user profile
+	uid, ok := userID.(uint)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	err = ucUserUploadAvatar.Execute(ctx, uid, avatarURL)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving avatar URL"})
+		return
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"user_id":  userID,
-		"username": username,
+		"message":   "Avatar uploaded successfully",
+		"image_url": avatarURL,
+	})
+}
+
+func (h *userHandler) Profile(ctx *gin.Context) {
+	userID := ctx.MustGet("user_id").(uint)
+
+	user, err := ucUserProfile.Execute(ctx, userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving user profile"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"user_id":   user.ID,
+		"username":  user.Username,
+		"image_url": user.ImageURL,
 	})
 }

@@ -28,3 +28,20 @@ func (r *userRepository) FindByUsername(ctx context.Context, username string) (*
 
 	return &user, nil
 }
+
+func (r *userRepository) UploadAvatar(ctx context.Context, userID uint, imageURL string) error {
+	db := config.GetDatabase()
+
+	return db.Model(&entities.User{}).Where("id = ?", userID).Update("ImageURL", imageURL).Error
+}
+
+func (r *userRepository) GetProfile(ctx context.Context, userId uint) (*entities.User, error) {
+	var user entities.User
+	db := config.GetDatabase()
+
+	if err := db.Where("id = ?", userId).First(&user).Error; err != nil {
+		return &entities.User{}, err
+	}
+
+	return &user, nil
+}

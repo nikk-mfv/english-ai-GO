@@ -16,6 +16,7 @@ func Routes(r *gin.Engine) {
 		UserGroup.POST("/create-account", userHandler.SignUp)
 		UserGroup.POST("/log-in", userHandler.Login)
 		UserGroup.GET("/profile", middleware.AuthMiddleware(), userHandler.Profile)
+		UserGroup.POST("/upload-avatar", middleware.AuthMiddleware(), userHandler.UploadAvatar)
 	}
 	// apply middleware
 	r.Use(middleware.AuthMiddleware())
