@@ -2,15 +2,23 @@ package routes
 
 import (
 	"englishAI/handlers"
-
 	"englishAI/middleware"
+
+	"golang.org/x/oauth2"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Routes(r *gin.Engine) {
-	// auth
+func Routes(r *gin.Engine, googleOauthConfig *oauth2.Config) {
 	userHandler := handlers.NewUserHandler()
+
+	// auth
+	GoogleGroup := r.Group("/auth/google")
+	{
+		GoogleGroup.GET("/login", userHandler.GoogleLogin(googleOauthConfig))
+		GoogleGroup.GET("/callback", userHandler.GoogleCallback(googleOauthConfig))
+	}
+
 	UserGroup := r.Group("/api/v1/user")
 	{
 		UserGroup.POST("/create-account", userHandler.SignUp)
@@ -18,6 +26,7 @@ func Routes(r *gin.Engine) {
 		UserGroup.GET("/profile", middleware.AuthMiddleware(), userHandler.Profile)
 		UserGroup.POST("/upload-avatar", middleware.AuthMiddleware(), userHandler.UploadAvatar)
 	}
+
 	// apply middleware
 	r.Use(middleware.AuthMiddleware())
 

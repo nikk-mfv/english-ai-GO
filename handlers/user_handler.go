@@ -21,6 +21,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/oauth2"
 )
 
 type userHandler struct {
@@ -240,6 +241,77 @@ func (h *userHandler) UploadAvatar(ctx *gin.Context) {
 	})
 }
 
+func (h *userHandler) GoogleLogin(googleOauthConfig *oauth2.Config) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		state := utils.GenerateState() // random string
+		ctx.SetCookie("oauthstate", state, 3600, "/", "", false, true)
+		url := googleOauthConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
+		ctx.Redirect(http.StatusTemporaryRedirect, url)
+	}
+}
+
+func (h *userHandler) GoogleCallback(googleOauthConfig *oauth2.Config) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		state := ctx.Query("state")
+		cookieState, _ := ctx.Cookie("oauthstate")
+		if state != cookieState {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OAuth state"})
+			return
+		}
+
+		code := ctx.Query("code")
+		if code == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "No code provided"})
+			return
+		}
+
+		token, err := googleOauthConfig.Exchange(context.Background(), code)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error exchanging code for token"})
+			return
+		}
+
+		user, err := config.FetchGoogleUserInfo(token)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user info"})
+			return
+		}
+
+		existingUser, err := ucUserFind.Execute(ctx, user.Username)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error finding user"})
+			return
+		}
+
+		if existingUser == nil {
+			user.Password = "" // No password for OAuth users
+			err = ucUserCreate.Execute(ctx, user)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
+				return
+			}
+		} else {
+			user.ID = existingUser.ID
+			user.Password = existingUser.Password // Use existing password
+		}
+
+		tokenString, err := utils.GenerateToken(user.ID, user.Username)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"message":    "Login successful",
+			"token":      tokenString,
+			"user_id":    user.ID,
+			"username":   user.Username,
+			"email":      user.Email,
+			"avatar_url": user.GetAvatarURL(),
+		})
+	}
+}
+
 func (h *userHandler) Profile(ctx *gin.Context) {
 	userID := ctx.MustGet("user_id").(uint)
 
@@ -250,8 +322,9 @@ func (h *userHandler) Profile(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"user_id":   user.ID,
-		"username":  user.Username,
-		"image_url": user.ImageURL,
+		"user_id":    user.ID,
+		"username":   user.Username,
+		"email":      user.Email,
+		"avatar_url": user.GetAvatarURL(),
 	})
 }

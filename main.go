@@ -15,6 +15,7 @@ func main() {
 	config.ConnectDatabase()
 	config.InitS3Client()
 	config.ConnectGenAi()
+	googleOauthConfig := config.NewGoogleOauthConfig()
 
 	migrations.Migrate()
 
@@ -30,7 +31,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	routes.Routes(r)
+	routes.Routes(r, googleOauthConfig)
 
 	r.Run("0.0.0.0:8080")
 }
